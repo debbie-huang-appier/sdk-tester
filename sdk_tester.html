@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDK Interactive Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .method-list {
+            list-style: none;
+        }
+
+        .method-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .method-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .method-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        .test-section {
+            display: none;
+        }
+
+        .test-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .test-section .description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-box h3 {
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SDK Interactive Tester</h1>
+            <p>Test and explore SDK methods in real-time</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>API Methods</h3>
+                <ul class="method-list">
+                    <li class="method-item active" data-method="get-user">Get User</li>
+                    <li class="method-item" data-method="create-user">Create User</li>
+                    <li class="method-item" data-method="update-user">Update User</li>
+                    <li class="method-item" data-method="delete-user">Delete User</li>
+                    <li class="method-item" data-method="list-items">List Items</li>
+                    <li class="method-item" data-method="custom-request">Custom Request</li>
+                </ul>
+            </div>
+
+            <div class="content-area">
+                <!-- Get User Section -->
+                <div class="test-section active" id="get-user">
+                    <h2>Get User by ID</h2>
+                    <p class="description">Retrieve user information by providing a user ID.</p>
+                    
+                    <div class="input-group">
+                        <label>User ID:</label>
+                        <input type="text" id="getUserId" placeholder="e.g., 12345" value="12345">
+                    </div>
+
+                    <button class="btn" onclick="testGetUser()">Execute Request</button>
+
+                    <div class="loading" id="loading-get-user">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+
+                    <div class="result-box" id="result-get-user" style="display:none;">
+                        <h3>Response:</h3>
+                        <div class="result-content" id="result-content-get-user"></div>
+                    </div>
+                </div>
+
+                <!-- Create User Section -->
+                <div class="test-section" id="create-user">
+                    <h2>Create New User</h2>
+                    <p class="description">Create a new user by providing user details.</p>
+                    
+                    <div class="input-group">
+                        <label>Name:</label>
+                        <input type="text" id="createUserName" placeholder="John Doe">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email:</label>
+                        <input type="email" id="createUserEmail" placeholder="john@example.com">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Role:</label>
+                        <select id="createUserRole">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="moderator">Moderator</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="testCreateUser()">Execute Request</button>
+
+                    <div class="loading" id="loading-create-user">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+
+                    <div class="result-box" id="result-create-user" style="display:none;">
+                        <h3>Response:</h3>
+                        <div class="result-content" id="result-content-create-user"></div>
+                    </div>
+                </div>
+
+                <!-- Update User Section -->
+                <div class="test-section" id="update-user">
+                    <h2>Update User</h2>
+                    <p class="description">Update an existing user's information.</p>
+                    
+                    <div class="input-group">
+                        <label>User ID:</label>
+                        <input type="text" id="updateUserId" placeholder="12345">
+                    </div>
+
+                    <div class="input-group">
+                        <label>New Name:</label>
+                        <input type="text" id="updateUserName" placeholder="Jane Doe">
+                    </div>
+
+                    <div class="input-group">
+                        <label>New Email:</label>
+                        <input type="email" id="updateUserEmail" placeholder="jane@example.com">
+                    </div>
+
+                    <button class="btn" onclick="testUpdateUser()">Execute Request</button>
+
+                    <div class="loading" id="loading-update-user">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+
+                    <div class="result-box" id="result-update-user" style="display:none;">
+                        <h3>Response:</h3>
+                        <div class="result-content" id="result-content-update-user"></div>
+                    </div>
+                </div>
+
+                <!-- Delete User Section -->
+                <div class="test-section" id="delete-user">
+                    <h2>Delete User</h2>
+                    <p class="description">Permanently delete a user from the system.</p>
+                    
+                    <div class="input-group">
+                        <label>User ID:</label>
+                        <input type="text" id="deleteUserId" placeholder="12345">
+                    </div>
+
+                    <button class="btn" onclick="testDeleteUser()">Execute Request</button>
+
+                    <div class="loading" id="loading-delete-user">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+
+                    <div class="result-box" id="result-delete-user" style="display:none;">
+                        <h3>Response:</h3>
+                        <div class="result-content" id="result-content-delete-user"></div>
+                    </div>
+                </div>
+
+                <!-- List Items Section -->
+                <div class="test-section" id="list-items">
+                    <h2>List Items</h2>
+                    <p class="description">Retrieve a paginated list of items.</p>
+                    
+                    <div class="input-group">
+                        <label>Page:</label>
+                        <input type="number" id="listPage" placeholder="1" value="1" min="1">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Items per page:</label>
+                        <input type="number" id="listLimit" placeholder="10" value="10" min="1" max="100">
+                    </div>
+
+                    <button class="btn" onclick="testListItems()">Execute Request</button>
+
+                    <div class="loading" id="loading-list-items">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+
+                    <div class="result-box" id="result-list-items" style="display:none;">
+                        <h3>Response:</h3>
+                        <div class="result-content" id="result-content-list-items"></div>
+                    </div>
+                </div>
+
+                <!-- Custom Request Section -->
+                <div class="test-section" id="custom-request">
+                    <h2>Custom Request</h2>
+                    <p class="description">Make a custom API request with your own parameters.</p>
+                    
+                    <div class="input-group">
+                        <label>Endpoint:</label>
+                        <input type="text" id="customEndpoint" placeholder="/api/custom">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Method:</label>
+                        <select id="customMethod">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Request Body (JSON):</label>
+                        <textarea id="customBody" placeholder='{"key": "value"}'></textarea>
+                    </div>
+
+                    <button class="btn" onclick="testCustomRequest()">Execute Request</button>
+
+                    <div class="loading" id="loading-custom-request">
+                        <div class="spinner"></div>
+                        <p>Loading...</p>
+                    </div>
+
+                    <div class="result-box" id="result-custom-request" style="display:none;">
+                        <h3>Response:</h3>
+                        <div class="result-content" id="result-content-custom-request"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation between methods
+        document.querySelectorAll('.method-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const method = this.getAttribute('data-method');
+                
+                // Update active states
+                document.querySelectorAll('.method-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.test-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(method).classList.add('active');
+            });
+        });
+
+        // Simulated SDK class - Replace this with your actual SDK
+        class MockSDK {
+            constructor() {
+                this.baseUrl = 'https://api.example.com';
+            }
+
+            async getUser(userId) {
+                await this.delay(800);
+                return {
+                    success: true,
+                    data: {
+                        id: userId,
+                        name: 'John Doe',
+                        email: 'john@example.com',
+                        role: 'user',
+                        createdAt: new Date().toISOString()
+                    }
+                };
+            }
+
+            async createUser(userData) {
+                await this.delay(1000);
+                return {
+                    success: true,
+                    data: {
+                        id: Math.floor(Math.random() * 10000),
+                        ...userData,
+                        createdAt: new Date().toISOString()
+                    }
+                };
+            }
+
+            async updateUser(userId, userData) {
+                await this.delay(900);
+                return {
+                    success: true,
+                    data: {
+                        id: userId,
+                        ...userData,
+                        updatedAt: new Date().toISOString()
+                    }
+                };
+            }
+
+            async deleteUser(userId) {
+                await this.delay(700);
+                return {
+                    success: true,
+                    message: `User ${userId} deleted successfully`
+                };
+            }
+
+            async listItems(page, limit) {
+                await this.delay(1200);
+                const items = [];
+                for (let i = 0; i < limit; i++) {
+                    items.push({
+                        id: (page - 1) * limit + i + 1,
+                        name: `Item ${(page - 1) * limit + i + 1}`,
+                        status: 'active'
+                    });
+                }
+                return {
+                    success: true,
+                    data: items,
+                    pagination: { page, limit, total: 100 }
+                };
+            }
+
+            async customRequest(endpoint, method, body) {
+                await this.delay(1000);
+                return {
+                    success: true,
+                    message: `${method} request to ${endpoint}`,
+                    echo: body
+                };
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        const sdk = new MockSDK();
+
+        function showLoading(method) {
+            document.getElementById(`loading-${method}`).classList.add('active');
+            document.getElementById(`result-${method}`).style.display = 'none';
+        }
+
+        function hideLoading(method) {
+            document.getElementById(`loading-${method}`).classList.remove('active');
+        }
+
+        function showResult(method, data, isSuccess = true) {
+            hideLoading(method);
+            const resultBox = document.getElementById(`result-${method}`);
+            const resultContent = document.getElementById(`result-content-${method}`);
+            
+            const badge = `<span class="status-badge ${isSuccess ? 'status-success' : 'status-error'}">${isSuccess ? 'SUCCESS' : 'ERROR'}</span><br>`;
+            resultContent.innerHTML = badge + JSON.stringify(data, null, 2);
+            resultBox.style.display = 'block';
+        }
+
+        async function testGetUser() {
+            const userId = document.getElementById('getUserId').value;
+            showLoading('get-user');
+            
+            try {
+                const result = await sdk.getUser(userId);
+                showResult('get-user', result);
+            } catch (error) {
+                showResult('get-user', { error: error.message }, false);
+            }
+        }
+
+        async function testCreateUser() {
+            const name = document.getElementById('createUserName').value;
+            const email = document.getElementById('createUserEmail').value;
+            const role = document.getElementById('createUserRole').value;
+            
+            showLoading('create-user');
+            
+            try {
+                const result = await sdk.createUser({ name, email, role });
+                showResult('create-user', result);
+            } catch (error) {
+                showResult('create-user', { error: error.message }, false);
+            }
+        }
+
+        async function testUpdateUser() {
+            const userId = document.getElementById('updateUserId').value;
+            const name = document.getElementById('updateUserName').value;
+            const email = document.getElementById('updateUserEmail').value;
+            
+            showLoading('update-user');
+            
+            try {
+                const result = await sdk.updateUser(userId, { name, email });
+                showResult('update-user', result);
+            } catch (error) {
+                showResult('update-user', { error: error.message }, false);
+            }
+        }
+
+        async function testDeleteUser() {
+            const userId = document.getElementById('deleteUserId').value;
+            showLoading('delete-user');
+            
+            try {
+                const result = await sdk.deleteUser(userId);
+                showResult('delete-user', result);
+            } catch (error) {
+                showResult('delete-user', { error: error.message }, false);
+            }
+        }
+
+        async function testListItems() {
+            const page = parseInt(document.getElementById('listPage').value);
+            const limit = parseInt(document.getElementById('listLimit').value);
+            
+            showLoading('list-items');
+            
+            try {
+                const result = await sdk.listItems(page, limit);
+                showResult('list-items', result);
+            } catch (error) {
+                showResult('list-items', { error: error.message }, false);
+            }
+        }
+
+        async function testCustomRequest() {
+            const endpoint = document.getElementById('customEndpoint').value;
+            const method = document.getElementById('customMethod').value;
+            const bodyText = document.getElementById('customBody').value;
+            
+            showLoading('custom-request');
+            
+            try {
+                let body = null;
+                if (bodyText) {
+                    body = JSON.parse(bodyText);
+                }
+                const result = await sdk.customRequest(endpoint, method, body);
+                showResult('custom-request', result);
+            } catch (error) {
+                showResult('custom-request', { error: error.message }, false);
+            }
+        }
+    </script>
+</body>
+</html>
