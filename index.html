@@ -601,11 +601,11 @@
             const email = document.getElementById('createUserEmail').value;
             const role = document.getElementById('createUserRole').value;
 
-              aiqua('track', 'create_user_clicked', {
-                name,
-                email,
-                role
-              });
+            aiqua('track', 'create_user_clicked', {
+              name,
+              email,
+              role
+            });
             
             showLoading('create-user');
             
