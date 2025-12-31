@@ -602,11 +602,10 @@
             const role = document.getElementById('createUserRole').value;
 
             appier('event', 'create_user_clicked', {
-              name: 'Debbie',
-              email: 'test@appier.com',
-              role: 'admin'
+              name,
+              email,
+              role
             }, 1);
-
             
             showLoading('create-user');
             
