@@ -243,14 +243,18 @@
         }
     </style>
 
-    <script>
-      (function(w,d,s,o,f,js,fjs){
-        w[o]=w[o]||function(){(w[o].q=w[o].q||[]).push(arguments)};
-        js=d.createElement(s);js.async=1;js.src=f;
-        fjs=d.getElementsByTagName(s)[0];
-        fjs.parentNode.insertBefore(js,fjs);
-      })(window,document,'script','aiqua','https://cdn.aiqua.io/sdk.js');
-    
+        <script type="text/javascript">
+          !function(q,g,r,a,p,h,js) {
+            q.appier=q.qg;
+            if(q.qg)return;
+            js=q.appier=q.qg=function() {
+              js.callmethod ? js.callmethod.call(js, arguments) : js.queue.push(arguments);
+            };
+            js.queue=[];
+            p=g.createElement(r);p.async=!0;p.src=a;h=g.getElementsByTagName(r)[0];
+            h.parentNode.insertBefore(p,h);
+          } (window,document,'script','https://cdn-prd-gcp-jp0.aiqua.io/qgraph.8ffe7334995be9abe9ab.js');
+
       aiqua('init', {
         appId: '8ffe7334995be9abe9ab'
       });
