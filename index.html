@@ -601,11 +601,12 @@
             const email = document.getElementById('createUserEmail').value;
             const role = document.getElementById('createUserRole').value;
 
-            aiqua('track', 'create_user_clicked', {
-              name,
-              email,
-              role
-            });
+            appier('event', 'create_user_clicked', {
+              name: 'Debbie',
+              email: 'test@appier.com',
+              role: 'admin'
+            }, 1);
+
             
             showLoading('create-user');
             
