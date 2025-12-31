@@ -484,6 +484,10 @@
             });
         });
 
+        appier('getUserId', (userId) => {
+          console.log('The userId is', userId);
+        }, 10000);
+
         // Simulated SDK class - Replace this with your actual SDK
         class MockSDK {
             constructor() {
