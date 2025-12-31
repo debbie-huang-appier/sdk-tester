@@ -605,7 +605,7 @@
             const email = document.getElementById('createUserEmail').value;
             const role = document.getElementById('createUserRole').value;
 
-            appier('event', 'create_user_clicked', {'product_id': 'debbie huang','product_name': 'Brand A Computer', 'category': 'electronics'});
+            appier('event', 'create_user_clicked', {'user_name': name,'user_email': email, 'user_role': role});
             
             showLoading('create-user');
             
